@@ -1,0 +1,9 @@
+    version: '3.3'
+
+    services:
+      api:
+        build: .
+        volumes:
+          - ./:/var/www/html/
+        ports:
+          - "3030:80"

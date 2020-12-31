@@ -1,0 +1,9 @@
+<Files *>
+	Deny from all
+</Files>
+<Files index.php>
+	Allow from all
+</Files>
+
+RewriteEngine On
+RewriteRule ^([^/]+)/? index.php?url=$1 [L,QSA]
