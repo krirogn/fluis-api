@@ -11,11 +11,24 @@ header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token');
 
 
+/// Include objects from composer
+require_once 'vendor/autoload.php';
+
+
 /// The classes that are required to run this script
 // The class that handles the global variables.
 require_once('classes/GV.php');
+// The class that handles the helper functions.
+require_once('classes/Helper.php');
 // The class that handles the files in data
 require_once('classes/fileDB.php');
+// The class that handles the S3 object storage
+require_once('classes/S3.php');
+
+
+/// The Environment constants
+define("S3_ACCESS_KEY_ID", getenv("S3_ACCESS_KEY_ID"));
+define("S3_SECRET_ACCESS_KEY", getenv("S3_SECRET_ACCESS_KEY"));
 
 
 /// Executes the file corresponding to the request route
@@ -41,6 +54,8 @@ function ExecuteRoute($dir, $folders = array(), $url = "") {
                 $file = substr($file, 0, -4);
 
                 if ($file == $fileName) {
+                    /// Include local objects
+                    $s3 = new S3();
 
                     include($dir.$file.".php");
 
