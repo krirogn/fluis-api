@@ -31,4 +31,16 @@ class Helper {
             }
         }
     }
+
+    static function PUT($key) {
+        $inputFileSrc = 'php://input';
+        $lines = file($inputFileSrc);
+    
+        foreach($lines as $i =>  $line){
+            $search = 'Content-Disposition: form-data; name="'.$key.'"';
+            if(strpos($line, $search) !== false){
+                return trim($lines[$i+2]);
+            }
+        }
+    }
 }

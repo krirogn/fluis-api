@@ -7,3 +7,7 @@
 
 RewriteEngine On
 RewriteRule ^([^/]+)/? index.php?url=$1 [L,QSA]
+
+# 5000M is 5GB
+php_value upload_max_filesize 5000M
+php_value post_max_size 5000M

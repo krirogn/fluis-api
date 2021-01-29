@@ -174,4 +174,60 @@ class S3 {
 
     }
 
+
+    public function getSeasons($title) {
+
+        if (!isset($title)) {
+            http_response_code(400);
+            die("Title not selected");
+        }
+
+        /// Get the programs
+        $response = $this->client->listObjects(array('Bucket' => GV::S3_BUCKET));
+        $files = $response->getPath('Contents');
+
+        $content = array();
+        foreach ($files as $file) {
+            if (substr($file['Key'], -1) == '/') {
+                /// Make sure it's a directory
+                $d = explode('/', $file['Key']);
+                $dir = "";
+                for ($i = 0; $i < sizeof($d) - 2; $i++) {
+                    $dir .= $d[$i];
+                }
+
+                if ($dir == $title) {
+                    array_push($content, substr(substr($file['Key'], 0, -1), strlen($dir) + 1));
+                }
+            }
+        }
+
+        return $content;
+
+    }
+
+    public function uploadVideo($fileName, $fileLocation) {
+
+        /// Sets the max time to 10m
+        set_time_limit(600);
+
+        $result = $this->client->putObject([
+			'Bucket' => GV::S3_BUCKET,
+			'Key'    => $fileName,
+            'SourceFile' => $fileLocation,
+            'ACL'    => 'public-read'		
+		]);
+
+        //var_dump($result);
+        if (isset($result)) {
+            return $fileName;
+        } else {
+            return FALSE;
+        }
+        
+        /// Sets the max time back to 30s
+        set_time_limit(30);
+
+    }
+
 }
