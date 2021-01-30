@@ -4,15 +4,13 @@ $postBody = json_decode($postBody);
 
 $code     = $postBody->code;
 $password = $postBody->password;
-$name     = $postBody->name;
 $uname    = $postBody->uname;
+$email    = $postBody->email;
 
 
-/// Checks if the name is in the right format
-// Checks if the name is shorter than 190 and bigger than 5.
-// Checks if the name contains a space and that the name
-// doesn't have whitespace on the start or end of the string.
-if (strlen($name) <= 190 && strlen($name) >= 5 && $name == trim($name) && strpos($name, ' ') !== false) {
+/// Checks if the email is in the right format
+// Checks if the email is not taken
+if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
     /// Checks if the password is longer than 6 and shorter than 60
     if (strlen($password) >= 6 && strlen($password) <=  60) {
         /// Checks the code
@@ -21,9 +19,9 @@ if (strlen($name) <= 190 && strlen($name) >= 5 && $name == trim($name) && strpos
             if (!in_array($uname, fileDB::users(), true) && strlen($uname) >= 1) {
 
                 $query  = '{'."\n";
-                $query .= "\t".'"name": "'.$name.'",'."\n";
+                $query .= "\t".'"id": '.(fileDB::highestUserId() + 1).",\n";
                 $query .= "\t".'"pass": "'.password_hash($password, PASSWORD_BCRYPT).'",'."\n";
-                $query .= "\t".'"id": '.(fileDB::highestUserId() + 1)."\n";
+                $query .= "\t".'"email": "'.$email.'"'."\n";
                 $query .= '}';
 
                 $fp = fopen(GV::DIR_USERS.$uname.'.json', 'w');
@@ -31,11 +29,16 @@ if (strlen($name) <= 190 && strlen($name) >= 5 && $name == trim($name) && strpos
                 fclose($fp);
 
                 /// Inserts user id into the index
-                $index = fileDB::get(GV::DIR_USERS."index.json", true);
-                array_push($index, $uname);
-                $fp = fopen(GV::DIR_USERS.'index.json', 'w');
-                fwrite($fp, json_encode($index));
-                fclose($fp);
+                if (fileDB::fileExists(GV::DIR_USERS."index.json", true)) {
+                    $index = fileDB::get(GV::DIR_USERS."index.json", true);
+                    array_push($index, $uname);
+                    $fp = fopen(GV::DIR_USERS.'index.json', 'w');
+                    fwrite($fp, json_encode($index));
+                    fclose($fp);
+                } else {
+                    fileDB::set(GV::DIR_USERS, "index.json", '{"1":"'.$uname.'"}', true);
+                }
+                
 
                 http_response_code(200);
                 exit("Created user successfully");
@@ -54,6 +57,5 @@ if (strlen($name) <= 190 && strlen($name) >= 5 && $name == trim($name) && strpos
     }
 } else {
   http_response_code(400);
-  die("The name has to shorter than 190 characters, longer than 5, can't have spaces on the ends
-       and has to have at least one space");
+  die("Not a valid email");
 }

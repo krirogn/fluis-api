@@ -1,7 +1,7 @@
 <?php
 $dirROOT = "routes/";
 $requestMethods = array("GET", "POST", "DELETE", "PUT");
-$dirSeperator = "-";
+$dirSeperator = "/";
 
 // -----------------------------------------------------------------------------
 /// Allow cross site resource sharing
@@ -81,7 +81,7 @@ function ExecuteRoute($dir, $folders = array(), $url = "") {
 /// Handles all the requests
 foreach ($requestMethods as $r) {
     if ($_SERVER['REQUEST_METHOD'] == $r) {
-        $folders = explode($dirSeperator, $_GET['url']);
+        $folders = explode($dirSeperator, substr($_SERVER['REQUEST_URI'], 1));
 
         if (sizeof($folders) == 1) {
             ExecuteRoute($r);
