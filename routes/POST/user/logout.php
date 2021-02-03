@@ -24,24 +24,31 @@ if (isset($userToken) && isset($da)) {
             die("The token doesn't exist");
         }
     } else {
-      $userId = (int)fileDB::get("login_tokens/".sha1($userToken).".lt")["userId"];
+        /// Check if the token exists
+        if (!fileDB::fileExists("login_tokens/".sha1($userToken).".lt")) {
+            http_response_code(400);
+            die("The token doesn't exist");
+        }
 
-      /// If the user with the id exists
-      if (array_key_exists($userId, fileDB::usersWithId())) {
-          /// Delete all the tokens from a user
-          $tokens = fileDB::getFilesInDir("login_tokens");
-          foreach ($tokens as $token) {
-              if (fileDB::get("login_tokens/".$token)["userId"] == $userId) {
-                  fileDB::del("login_tokens/".$token);
-              }
-          }
+        /// Gets the userId for the token
+        $userId = (int)fileDB::get("login_tokens/".sha1($userToken).".lt")["userId"];
 
-          http_response_code(200);
-          exit("All your sessions are removed");
-      } else {
-          http_response_code(400);
-          die("This user does not exist");
-      }
+        /// If the user with the id exists
+        if (array_key_exists($userId, fileDB::usersWithId())) {
+            /// Delete all the tokens from a user
+            $tokens = fileDB::getFilesInDir("login_tokens");
+            foreach ($tokens as $token) {
+                if (fileDB::get("login_tokens/".$token)["userId"] == $userId) {
+                    fileDB::del("login_tokens/".$token);
+                }
+            }
+
+            http_response_code(200);
+            exit("All your sessions are removed");
+        } else {
+            http_response_code(400);
+            die("This user does not exist");
+        }
     }
 
 } else {

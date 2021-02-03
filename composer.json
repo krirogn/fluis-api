@@ -1,5 +1,6 @@
 {
     "require": {
-        "aws/aws-sdk-php": "^3.171"
+        "aws/aws-sdk-php": "^3.171",
+        "athlon1600/youtube-downloader": "^2.1"
     }
 }
