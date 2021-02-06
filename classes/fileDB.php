@@ -82,13 +82,20 @@ class fileDB {
     }
 
 
-
     /// Functions for users
 
     /// Gets the code from the code file
     // file_get_contents() starts at root
     static function getCode() {
-      return (string)substr(file_get_contents(GV::CODE_PATH), 0, -1);
+        return (string)substr(file_get_contents(GV::CODE_PATH), 0, -1);
+    }
+
+    /// Sets the code in the code file
+    //  to a new code
+    static function setCode() {
+        $fp = fopen(GV::CODE_PATH, 'w');
+        fwrite($fp, Helper::generateRandomString(6));
+        fclose($fp);
     }
 
     /// Get's an array of all the usernames

@@ -196,14 +196,18 @@ class S3 {
                     $dir .= $d[$i];
                 }
 
-                if ($dir == $title) {
-                    array_push($content, substr(substr($file['Key'], 0, -1), strlen($dir) + 1));
+                if ($dir == "Shows".$title) {
+                    array_push($content, substr(substr($file['Key'], 1, -1), strlen($dir) + 1));
                 }
             }
         }
 
         return $content;
 
+    }
+
+    public function getMovies() {
+        
     }
 
     public function uploadVideo($fileName, $fileLocation) {

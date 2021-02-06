@@ -1,0 +1,31 @@
+{
+    "movies": [
+        {
+            "id": "246",
+            "path": "Avatar",
+            "watched": "0",
+            "languages": [
+                "en"
+            ],
+            "cc": [
+                "en"
+            ]
+        }
+    ],
+    "shows": [
+        {
+            "id": "246",
+            "path": "Avatar",
+            "watched": {
+                "1-1": "-1",
+                "1-2": "720"
+            },
+            "languages": [
+                "en"
+            ],
+            "cc": [
+                "en"
+            ]
+        }
+    ]
+}

@@ -39,6 +39,8 @@ if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     fileDB::set(GV::DIR_USERS, "index.json", '{"1":"'.$uname.'"}', true);
                 }
                 
+                /// Creates a new code pass
+                fileDB::setCode();
 
                 http_response_code(200);
                 exit("Created user successfully");
