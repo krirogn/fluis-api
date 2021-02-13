@@ -89,7 +89,11 @@ foreach ($requestMethods as $r) {
             $f = $folders;
             $url = array_pop($f);
 
-            ExecuteRoute($r, $f, $url);
+            /// Sanitize URL for GET requests
+            //  Remove everything but the root
+            $surl = explode("?", $url)[0];
+
+            ExecuteRoute($r, $f, $surl);
         }
     }
 }

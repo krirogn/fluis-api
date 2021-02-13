@@ -2,7 +2,7 @@
 class fileDB {
 
     /// A general query function
-    static function get($path, $root = false) {
+    static function get($path, $root = false, $asc = true) {
 
       if ($root == false) {
           $path = "data/".$path;
@@ -14,7 +14,7 @@ class fileDB {
           die("Couldn't open the file: ".$path);
       }
 
-      $json = json_decode($string, true);
+      $json = json_decode($string, $asc);
       if ($json === null) {
           http_response_code(400);
           die('Couldn\'t convert "'.$path.'" to a JSON array');
@@ -182,6 +182,16 @@ class fileDB {
         }
 
         return FALSE;
+
+    }
+
+    static function userId($login, $usersPath = GV::DIR_USERS) {
+
+        if (in_array(sha1($login).".lt", fileDB::getFilesInDir("login_tokens"))) {
+            $id = fileDB::get("login_tokens/".sha1($login).".lt");
+        }
+
+        return $id['userId'];
 
     }
 

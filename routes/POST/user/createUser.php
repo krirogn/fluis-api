@@ -38,6 +38,9 @@ if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 } else {
                     fileDB::set(GV::DIR_USERS, "index.json", '{"1":"'.$uname.'"}', true);
                 }
+
+                /// Create a library index
+                fileDB::set("library/", fileDB::highestUserId(), json_encode(fileDB::get("library/template.json")));
                 
                 /// Creates a new code pass
                 fileDB::setCode();

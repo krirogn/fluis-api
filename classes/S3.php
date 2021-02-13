@@ -175,6 +175,7 @@ class S3 {
     }
 
 
+
     public function getSeasons($title) {
 
         if (!isset($title)) {
@@ -207,10 +208,18 @@ class S3 {
     }
 
     public function getMovies() {
-        
+
+        return $this->getTitleQuery("Movies");
+
     }
 
-    public function uploadVideo($fileName, $fileLocation) {
+    public function getShows() {
+
+        return $this->getTitleQuery("Shows");
+
+    }
+
+    public function uploadVideo($fileName, $fileLocation, $id = "") {
 
         /// Sets the max time to 10m
         set_time_limit(600);
@@ -221,16 +230,113 @@ class S3 {
             'SourceFile' => $fileLocation,
             'ACL'    => 'public-read'		
 		]);
-
-        //var_dump($result);
+        
+        /// Checks if the upload was successfull
         if (isset($result)) {
-            return $fileName;
-        } else {
-            return FALSE;
+            /// Inserts the metadata
+            if ($id != "") {
+                ///
+            }
+        }
+
+        
+        /// Sets the max time back to 30s
+        set_time_limit(30);
+
+    }
+
+    /// 
+    public function uploadEpisode($title, $season, $number, $type, $fileLocation, $login, $id = "") {
+
+        /// Sets the max time to 10m
+        set_time_limit(600);
+
+        $loc = 'Shows/' . $title . '/' . $season . '/' . $number . '-en' . $type;
+
+        $result = $this->client->putObject([
+			'Bucket' => GV::S3_BUCKET,
+			'Key'    => $loc,
+            'SourceFile' => $fileLocation,
+            //'ACL'    => 'public-read'
+		]);
+
+        /// Checks if the upload was successfull
+        if (isset($result['ObjectURL'])) {
+            /// Inserts the metadata
+            /// If the ID is new, then you
+            //  have to create a new entry.
+            if ($id != "") {
+                $userId = fileDB::userId($login);
+                
+                ///
+                $lib = fileDB::get('library/'.$userId.'.json', false, false);
+                $lib->shows->$id = array(
+                    "id" => (String)$id,
+                    "path" => $title,
+                    "languages" => array(
+                        (String)$season."-".(String)$number => array("en")
+                    ),
+                    "cc" => array(
+                        (String)$season."-".(String)$number => array("en")
+                    )
+                );
+                fileDB::set('library/', $userId.'.json', json_encode($lib));
+            /// Insert an episode into an entry
+            } else {
+                $userId = fileDB::userId($login);
+                
+                ///
+                $showID = "";
+                $libID = fileDB::get('library/'.$userId.'.json');
+                foreach ($libID['shows'] as $sID => $sShow) {
+                    if ($sShow['path'] == $title) {
+                        $showID = $sShow['id'];
+                    }
+                }
+
+                ///
+                $lib = fileDB::get('library/'.$userId.'.json', false, false);
+                $episodeString = (String)$season."-".(String)$number;
+                $lib->shows->$showID->languages->$episodeString = array("en");
+                fileDB::set('library/', $userId.'.json', json_encode($lib));
+            }
         }
         
         /// Sets the max time back to 30s
         set_time_limit(30);
+
+    }
+
+
+    /// Private functions
+
+    /// Get the titles from S3
+    //  with a specified query
+    //  wich corresponds to the name
+    //  of the root folder of the title.
+    private function getTitleQuery($query) {
+
+        /// Get the programs
+        $response = $this->client->listObjects(array('Bucket' => GV::S3_BUCKET));
+        $files = $response->getPath('Contents');
+
+        $content = array();
+        foreach ($files as $file) {
+            if (substr($file['Key'], -1) == '/') {
+                /// Make sure it's a directory
+                $d = explode('/', $file['Key']);
+                $dir = "";
+                for ($i = 0; $i < sizeof($d) - 2; $i++) {
+                    $dir .= $d[$i];
+                }
+
+                if (substr($dir, 0, strlen($query)) == $query && sizeof($d) == 3) {
+                    array_push($content, substr($file['Key'], strlen($query) + 1, -1));
+                }
+            }
+        }
+
+        return $content;
 
     }
 
