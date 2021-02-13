@@ -189,17 +189,33 @@ class S3 {
 
         $content = array();
         foreach ($files as $file) {
-            if (substr($file['Key'], -1) == '/') {
-                /// Make sure it's a directory
-                $d = explode('/', $file['Key']);
-                $dir = "";
-                for ($i = 0; $i < sizeof($d) - 2; $i++) {
-                    $dir .= $d[$i];
-                }
+            $d = explode('/', $file['Key']);
+            if ($d[0] == "Shows" && sizeof($d) >= 3 && $d[1] == $title && !in_array($d[2], $content)) {
+                array_push($content, $d[2]);
+            }
+        }
 
-                if ($dir == "Shows".$title) {
-                    array_push($content, substr(substr($file['Key'], 1, -1), strlen($dir) + 1));
-                }
+        return $content;
+
+    }
+
+    public function getEpisodes($title, $season) {
+
+        if (!isset($title) || !isset($season)) {
+            http_response_code(400);
+            die("Title not selected");
+        }
+
+        /// Get the programs
+        $response = $this->client->listObjects(array('Bucket' => GV::S3_BUCKET));
+        $files = $response->getPath('Contents');
+
+        $content = array();
+        foreach ($files as $file) {
+            $d = explode('/', $file['Key']);
+            if ($d[0] == "Shows" && $d[1] == $title && $d[2] == $season) {
+                $e = explode('-', $d[3]);
+                array_push($content, $e[0]);
             }
         }
 
@@ -298,6 +314,7 @@ class S3 {
                 $lib = fileDB::get('library/'.$userId.'.json', false, false);
                 $episodeString = (String)$season."-".(String)$number;
                 $lib->shows->$showID->languages->$episodeString = array("en");
+                $lib->shows->$showID->cc->$episodeString = array("en");
                 fileDB::set('library/', $userId.'.json', json_encode($lib));
             }
         }
@@ -322,17 +339,9 @@ class S3 {
 
         $content = array();
         foreach ($files as $file) {
-            if (substr($file['Key'], -1) == '/') {
-                /// Make sure it's a directory
-                $d = explode('/', $file['Key']);
-                $dir = "";
-                for ($i = 0; $i < sizeof($d) - 2; $i++) {
-                    $dir .= $d[$i];
-                }
-
-                if (substr($dir, 0, strlen($query)) == $query && sizeof($d) == 3) {
-                    array_push($content, substr($file['Key'], strlen($query) + 1, -1));
-                }
+            $d = explode('/', $file['Key']);
+            if ($d[0] == $query && sizeof($d) >= 3 && !in_array($d[1], $content)) {
+                array_push($content, $d[1]);
             }
         }
 

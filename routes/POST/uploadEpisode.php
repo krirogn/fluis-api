@@ -17,7 +17,6 @@ $login  = $_POST['login'];
 /// Check if this is a new title
 $id = "";
 $shows = $s3->getShows();
-echo json_encode($shows)."\n";
 if (!in_array($title, $shows)) {
     if (isset($_POST['id'])) {
         /// Insert metadata
