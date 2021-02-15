@@ -24,7 +24,7 @@ if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $query .= "\t".'"email": "'.$email.'"'."\n";
                 $query .= '}';
 
-                $fp = fopen(GV::DIR_USERS.$uname.'.json', 'w');
+                $fp = fopen(GV::DIR_USERS.(String)(fileDB::highestUserId() + 1).'.json', 'w');
                 fwrite($fp, $query);
                 fclose($fp);
 

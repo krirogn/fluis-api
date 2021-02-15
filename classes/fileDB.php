@@ -101,24 +101,31 @@ class fileDB {
     /// Get's an array of all the usernames
     static function users($usersPath = GV::DIR_USERS) {
 
-        /// Gets all the files in the users directory
-        $usersDir = scandir($usersPath);
-        /// Removes the first two elements from the array
-        // It's because the two first elements are "." and ".."
-        $usersDir = array_slice($usersDir, 2);
-        /// Removes the index.json
-        if (($key = array_search("index.json", $usersDir)) !== false) {
-            unset($usersDir[$key]);
-        }
+        $usersIndex = fileDB::get($usersPath."index.json", true);
 
         $users = array();
         /// Removes the ".json" from the name
-        foreach ($usersDir as $file) {
-            array_push($users, substr($file, 0, -5));
+        foreach ($usersIndex as $id => $uname) {
+            array_push($users, $uname);
         }
 
         /// Cleans and reindexes the array
         return array_values($users);
+
+    }
+
+    /// 
+    static function idFromUsername($uname) {
+
+        $usersIndex = fileDB::get(GV::DIR_USERS."index.json", true);
+
+        foreach ($usersIndex as $id => $name) {
+            if ($uname == $name) {
+                return (String)$id;
+            }
+        }
+
+        return "No matching ID";
 
     }
 
@@ -192,6 +199,27 @@ class fileDB {
         }
 
         return $id['userId'];
+
+    }
+
+    static function updateWatch($login, $type, $id, $time) {
+
+        $urlType = ($type == "shows") ? "Shows" : "Movies";
+
+        /// Get the URL
+        $userId = fileDB::userId($login);
+
+        ///
+        $lib = fileDB::get('library/'.$userId.'.json', false, false);
+
+        if ($type == "shows") {
+
+        } else {
+            $lib->$type->$id->watched = $time;
+            fileDB::set('library/', $userId.'.json', json_encode($lib));
+            
+            return "Updated Movie";
+        }
 
     }
 

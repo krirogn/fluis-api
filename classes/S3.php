@@ -235,6 +235,18 @@ class S3 {
 
     }
 
+    public function getMoviesID($login) {
+
+        return $this->getIDQuery("movies", $login);
+
+    }
+
+    public function getShowsID($login) {
+
+        return $this->getIDQuery("shows", $login);
+
+    }
+
     public function uploadVideo($fileName, $fileLocation, $id = "") {
 
         /// Sets the max time to 10m
@@ -324,6 +336,44 @@ class S3 {
 
     }
 
+    /// 
+    public function uploadMovie($title, $type, $fileLocation, $login, $id) {
+
+        /// Sets the max time to 10m
+        set_time_limit(600);
+
+        $loc = 'Movies/' . $title . '/main-en' . $type;
+
+        $result = $this->client->putObject([
+			'Bucket' => GV::S3_BUCKET,
+			'Key'    => $loc,
+            'SourceFile' => $fileLocation,
+		]);
+
+        /// Checks if the upload was successfull
+        if (isset($result['ObjectURL'])) {
+            /// Inserts the metadata
+            /// If the ID is new, then you
+            //  have to create a new entry.
+            $userId = fileDB::userId($login);
+            
+            ///
+            $lib = fileDB::get('library/'.$userId.'.json', false, false);
+            $lib->movies->$id = array(
+                "id" => (String)$id,
+                "path" => $title,
+                "watched" => 0,
+                "languages" => array("en"),
+                "cc" => array("en")
+            );
+            fileDB::set('library/', $userId.'.json', json_encode($lib));
+        }
+        
+        /// Sets the max time back to 30s
+        set_time_limit(30);
+
+    }
+
 
     /// Private functions
 
@@ -346,6 +396,22 @@ class S3 {
         }
 
         return $content;
+
+    }
+
+    private function getIDQuery($query, $login) {
+
+        $IDs = array();
+
+        /// 
+        $userId = fileDB::userId($login);
+        
+        $lib = fileDB::get('library/'.$userId.'.json', false, false);
+        foreach($lib->$query as $id => $c) {
+            array_push($IDs, $id);
+        }
+
+        return $IDs;
 
     }
 

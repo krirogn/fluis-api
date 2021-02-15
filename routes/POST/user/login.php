@@ -8,7 +8,7 @@ $password = $postBody->password;
 /// Checks if the username exists
 if (in_array($uname, fileDB::users())) {
     /// Checks if the password matches the users password
-    if (password_verify($password, strval(fileDB::get("users/".$uname.".json")["pass"]))) {
+    if (password_verify($password, strval(fileDB::get("users/".fileDB::idFromUsername($uname).".json")["pass"]))) {
 
         /// Generates a login token
         // Generates the token
@@ -34,7 +34,7 @@ if (in_array($uname, fileDB::users())) {
         }
 
         /// Gets the users id
-        $userId  = fileDB::get("users/".$uname.".json")['id'];
+        $userId = fileDB::idFromUsername($uname);
 
         /// The JSON data for the login_tokens file
         $data  = '{'."\n";
