@@ -196,13 +196,16 @@ class fileDB {
 
         if (in_array(sha1($login).".lt", fileDB::getFilesInDir("login_tokens"))) {
             $id = fileDB::get("login_tokens/".sha1($login).".lt");
+        } else {
+            http_response_code(400);
+            die ("No matching login tokens");
         }
 
         return $id['userId'];
 
     }
 
-    static function updateWatch($login, $type, $id, $time) {
+    static function updateWatch($login, $type, $id, $time, $season = "", $episode = "") {
 
         $urlType = ($type == "shows") ? "Shows" : "Movies";
 
@@ -213,13 +216,34 @@ class fileDB {
         $lib = fileDB::get('library/'.$userId.'.json', false, false);
 
         if ($type == "shows") {
-
+            if ($season != "" && $episode != "") {
+                $episodeIndex = (String)$season."-".(String)$episode;
+                $lib->$type->$id->watched->$episodeIndex = $time;
+                fileDB::set('library/', $userId.'.json', json_encode($lib));
+            
+                return "Updated Show";
+            } else {
+                http_response_code(400);
+                die("Show data is not set");
+            }
         } else {
             $lib->$type->$id->watched = $time;
             fileDB::set('library/', $userId.'.json', json_encode($lib));
             
             return "Updated Movie";
         }
+
+    }
+
+    static function titleFromID($login, $id) {
+
+        /// Get the user ID
+        $userId = fileDB::userId($login);
+
+        ///
+        $lib = fileDB::get('library/'.$userId.'.json', false, false);
+
+        return $lib->shows->$id->path;
 
     }
 

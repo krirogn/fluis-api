@@ -30,5 +30,18 @@ $type  = $postBody->type;
 $id    = $postBody->id;
 $time  = $postBody->time;
 
-http_response_code(200);
-exit(fileDB::updateWatch($login, $type, $id, $time));
+if ($type == "shows") {
+    if (isset($postBody->season) && isset($postBody->episode)) {
+        $season  = $postBody->season;
+        $episode = $postBody->episode;
+
+        http_response_code(200);
+        exit(fileDB::updateWatch($login, $type, $id, $time, $season, $episode));
+    } else {
+        http_response_code(400);
+        die("Show data is not set");
+    }
+} else {
+    http_response_code(200);
+    exit(fileDB::updateWatch($login, $type, $id, $time));
+}

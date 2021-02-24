@@ -199,12 +199,69 @@ class S3 {
 
     }
 
+    public function getSeasonsFromID($login, $id) {
+
+        if (!isset($id)) {
+            http_response_code(400);
+            die("ID not selected");
+        }
+        if (!isset($login)) {
+            http_response_code(400);
+            die("Login not selected");
+        }
+
+        /// Get the title from ID
+        $title = fileDB::titleFromID($login, $id);
+
+        /// Get the programs
+        $response = $this->client->listObjects(array('Bucket' => GV::S3_BUCKET));
+        $files = $response->getPath('Contents');
+
+        $content = array();
+        foreach ($files as $file) {
+            $d = explode('/', $file['Key']);
+            if ($d[0] == "Shows" && sizeof($d) >= 3 && $d[1] == $title && !in_array($d[2], $content)) {
+                array_push($content, $d[2]);
+            }
+        }
+
+        return $content;
+
+    }
+
     public function getEpisodes($title, $season) {
 
         if (!isset($title) || !isset($season)) {
             http_response_code(400);
             die("Title not selected");
         }
+
+        /// Get the programs
+        $response = $this->client->listObjects(array('Bucket' => GV::S3_BUCKET));
+        $files = $response->getPath('Contents');
+
+        $content = array();
+        foreach ($files as $file) {
+            $d = explode('/', $file['Key']);
+            if ($d[0] == "Shows" && $d[1] == $title && $d[2] == $season) {
+                $e = explode('-', $d[3]);
+                array_push($content, $e[0]);
+            }
+        }
+
+        return $content;
+
+    }
+
+    public function getEpisodesFromID($login, $id, $season) {
+
+        if (!isset($id) || !isset($season)) {
+            http_response_code(400);
+            die("Title not selected");
+        }
+
+        /// Get the title from ID
+        $title = fileDB::titleFromID($login, $id);
 
         /// Get the programs
         $response = $this->client->listObjects(array('Bucket' => GV::S3_BUCKET));
