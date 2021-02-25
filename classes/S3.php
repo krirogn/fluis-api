@@ -405,6 +405,7 @@ class S3 {
 			'Bucket' => GV::S3_BUCKET,
 			'Key'    => $loc,
             'SourceFile' => $fileLocation,
+            'ACL'    => 'public-read'
 		]);
 
         /// Checks if the upload was successfull
