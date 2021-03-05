@@ -14,6 +14,9 @@ $season = $_POST['season'];
 $number   = $_POST['number'];
 $login  = $_POST['login'];
 
+/// Checks authentification
+Auth::authReturn($login);
+
 /// Check if this is a new title
 $id = "";
 $shows = $s3->getShows();

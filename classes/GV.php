@@ -14,4 +14,7 @@ class GV {
     const DIR_DATA  = "data/";
     const DIR_USERS = "data/users/";
     const CODE_PATH = "data/code.pass";
+
+    /// USERS
+    const AUTH_MAX_TIME = 5;
 }

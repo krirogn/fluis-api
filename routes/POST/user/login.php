@@ -15,6 +15,11 @@ if (in_array($uname, fileDB::users())) {
         $cstrong = true;
         $token   = bin2hex(openssl_random_pseudo_bytes(64, $cstrong));
 
+        /// Checks if login token foler exists
+        if (!fileDB::folderExists("login_tokens")) {
+          fileDB::setFolder("login_tokens");
+        }
+
         /// Check if token is already taken
         if (in_array($token.".lt", fileDB::getFilesInDir("login_tokens"))) {
           $tokenTaken = true;

@@ -5,8 +5,9 @@ $dirSeperator = "/";
 
 // -----------------------------------------------------------------------------
 /// Allow cross site resource sharing
-// This has to be taken away before production!!!
-header('Access-Control-Allow-Origin: *');
+//  The localhost has to be taken away before production!!!
+header('Access-Control-Allow-Origin: http://localhost:3000');
+//header('Access-Control-Allow-Origin: fluis.org');
 header('Access-Control-Allow-Methods: GET, POST, DELETE, PUT, OPTIONS');
 header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token');
 
@@ -24,6 +25,8 @@ require_once('classes/Helper.php');
 require_once('classes/fileDB.php');
 // The class that handles the S3 object storage
 require_once('classes/S3.php');
+// The class that handles the authentication of users
+require_once('classes/Auth.php');
 
 
 /// The Environment constants

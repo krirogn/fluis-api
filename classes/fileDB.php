@@ -1,6 +1,7 @@
 <?php
 class fileDB {
 
+    /// General File DB functions
     /// A general query function
     static function get($path, $root = false, $asc = true) {
 
@@ -37,6 +38,19 @@ class fileDB {
 
     }
 
+    /// A general folder making function
+    static function setFolder($path, $root = false) {
+
+        if ($root == false) {
+            $path = "data/".$path;
+        }
+
+        if (is_dir($path) == false) {
+            mkdir($path);
+        }
+
+    }
+
     /// A general file deletion function
     static function del($path, $root = false) {
 
@@ -55,7 +69,7 @@ class fileDB {
             $path = "data/".$path;
         }
   
-        if (file_exists($path)) {
+        if (file_exists($path) == true) {
             return TRUE;
         } else {
             return FALSE;
@@ -63,6 +77,20 @@ class fileDB {
 
     }
 
+    ///
+    static function folderExists($path, $root = false) {
+
+        if ($root == false) {
+            $path = "data/".$path;
+        }
+
+        if (is_dir($path) == true) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    
+    }
 
     /// A general function to output all files in a dir
     static function getFilesInDir($path, $root = false) {
