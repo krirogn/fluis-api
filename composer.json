@@ -1,6 +1,7 @@
 {
     "require": {
         "aws/aws-sdk-php": "^3.171",
-        "athlon1600/youtube-downloader": "^2.1"
+        "athlon1600/youtube-downloader": "^2.1",
+        "symfony/process": "^5.2"
     }
 }

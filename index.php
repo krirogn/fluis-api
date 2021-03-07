@@ -27,6 +27,8 @@ require_once('classes/fileDB.php');
 require_once('classes/S3.php');
 // The class that handles the authentication of users
 require_once('classes/Auth.php');
+// The class that handles the FFMPEG binary
+require_once('classes/FFMPEG.php');
 
 
 /// The Environment constants
