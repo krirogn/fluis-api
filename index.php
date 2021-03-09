@@ -31,11 +31,6 @@ require_once('classes/Auth.php');
 require_once('classes/FFMPEG.php');
 
 
-/// The Environment constants
-define("S3_ACCESS_KEY_ID", getenv("S3_ACCESS_KEY_ID"));
-define("S3_SECRET_ACCESS_KEY", getenv("S3_SECRET_ACCESS_KEY"));
-
-
 /// Executes the file corresponding to the request route
 function ExecuteRoute($dir, $folders = array(), $url = "") {
     global $dirROOT;
@@ -60,7 +55,14 @@ function ExecuteRoute($dir, $folders = array(), $url = "") {
 
                 if ($file == $fileName) {
                     /// Include local objects
-                    $s3 = new S3();
+                    $USER = NULL;
+                    $s3 = NULL;
+
+                    Auth::user($dir);
+
+                    if (isset($USER)) {
+                        $s3 = new S3($USER['s3_base'], $USER['s3_bucket'], $USER['s3_region'], $USER['s3_access_key'], $USER['s3_secret_key']);
+                    }
 
                     include($dir.$file.".php");
 

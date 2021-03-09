@@ -24,7 +24,7 @@ if ($type == "shows") {
         $season  = $_GET['season'];
         $episode = $_GET['episode'];
         $index = $season.'-'.$episode;
-        $cont = array("https://fluis-media.s3.fr-par.scw.cloud/"."Shows"."/".$lib->$type->$id->path."/".$season."/".$episode."-en.mp4", $lib->$type->$id->watched->$index);
+        $cont = array("https://fluis-media.s3.fr-par.scw.cloud/".(String)$userId."Shows"."/".$lib->$type->$id->path."/".$season."/".$episode."-en.mp4", $lib->$type->$id->watched->$index);
     } else {
         http_response_code(400);
         die("Show data is not set");
@@ -32,7 +32,7 @@ if ($type == "shows") {
     
 //  If this is a movie
 } else {
-    $cont = array("https://fluis-media.s3.fr-par.scw.cloud/"."Movies"."/".$lib->$type->$id->path."/main-en.mp4", $lib->$type->$id->watched);
+    $cont = array("https://fluis-media.s3.fr-par.scw.cloud/".(String)$userId."Movies"."/".$lib->$type->$id->path."/main-en.mp4", $lib->$type->$id->watched);
 }
 
 http_response_code(200);

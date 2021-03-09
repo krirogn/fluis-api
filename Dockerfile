@@ -1,19 +1,17 @@
 FROM php:7-apache
-RUN apt-get update && apt-get install -y libzip-dev git
+RUN apt-get update && apt-get install -y libzip-dev git wget apt-utils
 RUN docker-php-ext-install pdo pdo_mysql zip
 RUN a2enmod rewrite
 RUN service apache2 restart
 
-# Install FFMPEG
-RUN apt-get update && apt-get install -y ffmpeg
+# Install FFMPEG and MEncoder
+RUN apt-get update && apt-get install -y ffmpeg mencoder
 
-# Build VobSub2SRT
-RUN apt-get update \
-    && apt-get install -y libtiff5-dev libtesseract-dev tesseract-ocr-all build-essential cmake pkg-config \
-    && apt-get clean \
-    && git clone https://github.com/ruediger/VobSub2SRT.git VobSub2SRT \
-    && cd VobSub2SRT \
-    && ./configure \
-    && make -j`nproc` \
-    && make install \
-    && make clean
+# Install VobSub2SRT
+RUN cd /tmp \
+    && wget https://www.deb-multimedia.org/pool/main/d/deb-multimedia-keyring/deb-multimedia-keyring_2016.8.1_all.deb \
+    && dpkg -i deb-multimedia-keyring_2016.8.1_all.deb
+
+RUN echo "deb http://www.deb-multimedia.org sid main" | tee -a /etc/apt/sources.list.d/multimedia.list
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get update && apt-get install -y tesseract-ocr-all vobsub2srt

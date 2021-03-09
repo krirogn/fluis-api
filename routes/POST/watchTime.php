@@ -8,24 +8,18 @@ if (!isset($postBody->type)) {
     http_response_code(400);
     die("'type' not set");
 } else {
-    if (!isset($postBody->login)) {
+    if (!isset($postBody->id)) {
         http_response_code(400);
-        die("'login' not set");
+        die("'id' not set");
     } else {
-        if (!isset($postBody->id)) {
+        if (!isset($postBody->time)) {
             http_response_code(400);
-            die("'id' not set");
-        } else {
-            if (!isset($postBody->time)) {
-                http_response_code(400);
-                die("'time' not set");
-            }
+            die("'time' not set");
         }
     }
 }
 
 /// Set the vars
-$login = $postBody->login;
 $type  = $postBody->type;
 $id    = $postBody->id;
 $time  = $postBody->time;
@@ -36,12 +30,12 @@ if ($type == "shows") {
         $episode = $postBody->episode;
 
         http_response_code(200);
-        exit(fileDB::updateWatch($login, $type, $id, $time, $season, $episode));
+        exit(fileDB::updateWatch($type, $id, $time, $season, $episode));
     } else {
         http_response_code(400);
         die("Show data is not set");
     }
 } else {
     http_response_code(200);
-    exit(fileDB::updateWatch($login, $type, $id, $time));
+    exit(fileDB::updateWatch($type, $id, $time));
 }

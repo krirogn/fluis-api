@@ -1,6 +1,38 @@
 <?php
 class Auth {
 
+  static function user($dir) {
+
+    if ($_SERVER['REQUEST_METHOD'] == "POST" && $dir != "routes/POST/user/") {
+      $postBody = file_get_contents("php://input");
+      $postBody = json_decode($postBody);
+      
+      Auth::authReturn($postBody->login);
+      echo fileDB::get("login_tokens/".sha1($postBody->login).".lt");
+      return fileDB::get(GV::DIR_USERS.fileDB::get("login_tokens/".sha1($postBody->login).".lt")['userId'].".json", true);
+    }
+
+  }
+
+  static function userHandler() {
+
+    if ($_SERVER['REQUEST_METHOD'] == "POST") {
+
+      $postBody = file_get_contents("php://input");
+      $postBody = json_decode($postBody);
+      
+      Auth::authReturn($postBody->login);
+      return fileDB::get(GV::DIR_USERS.fileDB::get("login_tokens/".sha1($postBody->login).".lt")['userId'].".json", true);
+
+    } else if ($_SERVER['REQUEST_METHOD'] == "GET") {
+      
+      Auth::authReturn($_GET['login']);
+      return fileDB::get(GV::DIR_USERS.fileDB::get("login_tokens/".sha1($_GET['login']).".lt")['userId'].".json", true);
+
+    }
+
+  }
+
   static function authExit($token) {
 
     /// Checks if login token foler exists

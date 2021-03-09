@@ -233,12 +233,12 @@ class fileDB {
 
     }
 
-    static function updateWatch($login, $type, $id, $time, $season = "", $episode = "") {
+    static function updateWatch($type, $id, $time, $season = "", $episode = "") {
 
         $urlType = ($type == "shows") ? "Shows" : "Movies";
 
         /// Get the URL
-        $userId = fileDB::userId($login);
+        $userId = $USER['id'];
 
         ///
         $lib = fileDB::get('library/'.$userId.'.json', false, false);
@@ -263,10 +263,10 @@ class fileDB {
 
     }
 
-    static function titleFromID($login, $id) {
+    static function titleFromID($id) {
 
         /// Get the user ID
-        $userId = fileDB::userId($login);
+        $userId = $USER['id'];
 
         ///
         $lib = fileDB::get('library/'.$userId.'.json', false, false);

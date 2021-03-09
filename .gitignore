@@ -1,4 +1,7 @@
 .DS_Store
 vendor/
 data/login_tokens
-Dash/
+data/users
+data/library
+!data/library/README.md
+!data/library/template.json

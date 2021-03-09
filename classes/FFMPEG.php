@@ -16,6 +16,20 @@ class FFMPEG {
             | cut -f2- -d=';
 
     exec($cmd, $output, $retval);
+
+    /*$process = new Process([
+      'ffprobe', '-show_entries', 'stream=index,codec_type:stream_tags=language', '-of', 'compact', $path,
+      '-v', '0', '\ |', 
+    ]);
+    $process->start();
+
+    $process->wait(function ($type, $buffer) {
+        if (Process::ERR === $type) {
+            echo 'ERR > '.$buffer;
+        } else {
+            echo 'OUT > '.$buffer;
+        }
+    });*/
     
     /// A return value of 0
     //  indicates a success
@@ -185,6 +199,28 @@ class FFMPEG {
     system($cmd2);
 
     echo file_get_contents("/var/www/html/dash/manifest.mpd");
+  }
+
+  static function extractVobsub($path) {
+
+  }
+
+  /// Use MEncoder to extract vobsub from MPEG files,
+  //  then use VobSub2SRT to convert them to webvtt files. 
+  static function vobsub2srt($path) {
+    $cmd = 'vobsub2srt';
+    $cmd2 = 'mencoder';
+
+    exec($cmd2, $output, $retval);
+
+    /// A return value of 0
+    //  indicates a success
+    if ($retval == 0) {
+      return $output;
+    } else {
+      http_response_code(400);
+      die($retval."\n\n".print_r($output));
+    }
   }
 
 }

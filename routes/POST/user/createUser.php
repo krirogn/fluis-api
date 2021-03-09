@@ -2,10 +2,16 @@
 $postBody = file_get_contents("php://input");
 $postBody = json_decode($postBody);
 
-$code     = $postBody->code;
-$password = $postBody->password;
-$uname    = $postBody->uname;
-$email    = $postBody->email;
+$code        = $postBody->code;
+$password    = $postBody->password;
+$uname       = $postBody->uname;
+$email       = $postBody->email;
+
+$s3Base      = $postBody->s3Base;
+$s3Bucket    = $postBody->s3Bucket;
+$s3Region    = $postBody->s3Region;
+$s3AccessKey = $postBody->s3AccessKey;
+$s3SecretKey = $postBody->s3SecretKey;
 
 
 /// Checks if the email is in the right format
@@ -22,6 +28,11 @@ if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $query .= "\t".'"id": '.(fileDB::highestUserId() + 1).",\n";
                 $query .= "\t".'"pass": "'.password_hash($password, PASSWORD_BCRYPT).'",'."\n";
                 $query .= "\t".'"email": "'.$email.'"'."\n";
+                $query .= "\t".'"s3_base": "'.$s3Base.'"'."\n";
+                $query .= "\t".'"s3_bucket": "'.$s3Bucket.'"'."\n";
+                $query .= "\t".'"s3_region": "'.$s3Region.'"'."\n";
+                $query .= "\t".'"s3_access_key": "'.$s3AccessKey.'"'."\n";
+                $query .= "\t".'"s3_secret_key": "'.$s3SecretKey.'"'."\n";
                 $query .= '}';
 
                 $fp = fopen(GV::DIR_USERS.(String)(fileDB::highestUserId() + 1).'.json', 'w');
@@ -37,6 +48,11 @@ if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     fclose($fp);
                 } else {
                     fileDB::set(GV::DIR_USERS, "index.json", '{"1":"'.$uname.'"}', true);
+                }
+
+                /// Checks if the foler exists
+                if (!fileDB::folderExists("library")) {
+                  fileDB::setFolder("library");
                 }
 
                 /// Create a library index
