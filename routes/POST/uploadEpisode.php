@@ -15,7 +15,7 @@ $number   = $_POST['number'];
 
 /// Check if this is a new title
 $id = "";
-$shows = $s3->getShows();
+$shows = $GLOBALS['s3']->getShows();
 if (!in_array($title, $shows)) {
     if (isset($_POST['id'])) {
         /// Insert metadata
@@ -36,4 +36,4 @@ if ($ext == 'mp4' || $ext == 'm4v') {
 }
 
 http_response_code(200);
-exit($s3->uploadEpisode($title, $season, $number, $type, $_FILES['video']['tmp_name'], $id));
+exit($GLOBALS['s3']->uploadEpisode($title, $season, $number, $type, $_FILES['video']['tmp_name'], $id));

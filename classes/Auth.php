@@ -4,12 +4,45 @@ class Auth {
   static function user($dir) {
 
     if ($_SERVER['REQUEST_METHOD'] == "POST" && $dir != "routes/POST/user/") {
-      $postBody = file_get_contents("php://input");
-      $postBody = json_decode($postBody);
+
+      $token;
+      if (isset($_POST['login'])) {
+        $token = $_POST['login'];
+      } else {
+        $postBody = file_get_contents("php://input");
+        $postBody = json_decode($postBody);
+
+        if (isset($postBody->login)) {
+          $token = $postBody->login;
+        } else {
+          http_response_code(400);
+          die("No login token provided");
+        }
+      }
+
+      Auth::authReturn($token);
+      $GLOBALS['USER'] = fileDB::get(GV::DIR_USERS.fileDB::get("login_tokens/".sha1($token).".lt")['userId'].".json", true);
       
-      Auth::authReturn($postBody->login);
-      echo fileDB::get("login_tokens/".sha1($postBody->login).".lt");
-      return fileDB::get(GV::DIR_USERS.fileDB::get("login_tokens/".sha1($postBody->login).".lt")['userId'].".json", true);
+    } else if ($_SERVER['REQUEST_METHOD'] == "DELETE") {
+
+      $token;
+      if (isset($_POST['login'])) {
+        $token = $_POST['login'];
+      } else {
+        $postBody = file_get_contents("php://input");
+        $postBody = json_decode($postBody);
+
+        if (isset($postBody->login)) {
+          $token = $postBody->login;
+        } else {
+          http_response_code(400);
+          die("No login token provided");
+        }
+      }
+
+      Auth::authReturn($token);
+      $GLOBALS['USER'] = fileDB::get(GV::DIR_USERS.fileDB::get("login_tokens/".sha1($token).".lt")['userId'].".json", true);
+
     }
 
   }
@@ -18,16 +51,28 @@ class Auth {
 
     if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
-      $postBody = file_get_contents("php://input");
-      $postBody = json_decode($postBody);
+      $token;
+      if (isset($_POST['login'])) {
+        $token = $_POST['login'];
+      } else {
+        $postBody = file_get_contents("php://input");
+        $postBody = json_decode($postBody);
+
+        if (isset($postBody->login)) {
+          $token = $postBody->login;
+        } else {
+          http_response_code(400);
+          die("No login token provided");
+        }
+      }
       
-      Auth::authReturn($postBody->login);
-      return fileDB::get(GV::DIR_USERS.fileDB::get("login_tokens/".sha1($postBody->login).".lt")['userId'].".json", true);
+      Auth::authReturn($token);
+      $GLOBALS['USER'] = fileDB::get(GV::DIR_USERS.fileDB::get("login_tokens/".sha1($token).".lt")['userId'].".json", true);
 
     } else if ($_SERVER['REQUEST_METHOD'] == "GET") {
       
       Auth::authReturn($_GET['login']);
-      return fileDB::get(GV::DIR_USERS.fileDB::get("login_tokens/".sha1($_GET['login']).".lt")['userId'].".json", true);
+      $GLOBALS['USER'] = fileDB::get(GV::DIR_USERS.fileDB::get("login_tokens/".sha1($_GET['login']).".lt")['userId'].".json", true);
 
     }
 
@@ -86,14 +131,14 @@ class Auth {
       if ($tokenDate->diff(new DateTime())->days > GV::AUTH_MAX_TIME) {
 
         http_response_code(400);
-        die("Not logged in");
+        die("Token has expired");
 
       }
 
     } else {
 
       http_response_code(400);
-      die("Not logged in");
+      die("Not logged in2");
 
     }
 

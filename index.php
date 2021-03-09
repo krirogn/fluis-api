@@ -55,13 +55,11 @@ function ExecuteRoute($dir, $folders = array(), $url = "") {
 
                 if ($file == $fileName) {
                     /// Include local objects
-                    $USER = NULL;
-                    $s3 = NULL;
 
-                    Auth::user($dir);
+                    $GLOBALS['USER'] = Auth::user($dir);
 
-                    if (isset($USER)) {
-                        $s3 = new S3($USER['s3_base'], $USER['s3_bucket'], $USER['s3_region'], $USER['s3_access_key'], $USER['s3_secret_key']);
+                    if (isset($GLOBALS['USER'])) {
+                        $GLOBALS['s3'] = new S3($GLOBALS['USER']['s3_base'], $GLOBALS['USER']['s3_bucket'], $GLOBALS['USER']['s3_region'], $GLOBALS['USER']['s3_access_key'], $GLOBALS['USER']['s3_secret_key']);
                     }
 
                     include($dir.$file.".php");

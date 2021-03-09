@@ -7,8 +7,6 @@ class FFMPEG {
   /// General helper functions
   /// Get the audio language tracks
   static function getAudioLangs($path) {
-    $output=null;
-    $retval=null;
 
     $cmd = 'ffprobe -show_entries stream=index,codec_type:stream_tags=language -of compact '.$path.' -v 0 \
             | grep codec_type=audio \
@@ -17,20 +15,6 @@ class FFMPEG {
 
     exec($cmd, $output, $retval);
 
-    /*$process = new Process([
-      'ffprobe', '-show_entries', 'stream=index,codec_type:stream_tags=language', '-of', 'compact', $path,
-      '-v', '0', '\ |', 
-    ]);
-    $process->start();
-
-    $process->wait(function ($type, $buffer) {
-        if (Process::ERR === $type) {
-            echo 'ERR > '.$buffer;
-        } else {
-            echo 'OUT > '.$buffer;
-        }
-    });*/
-    
     /// A return value of 0
     //  indicates a success
     if ($retval == 0) {
@@ -39,12 +23,14 @@ class FFMPEG {
       http_response_code(400);
       die($retval."\n\n".print_r($output));
     }
+
   }
 
   /// Get the subtitle language tracks
   static function getCaptionLangs($path) {
-    $output=null;
-    $retval=null;
+
+    $output = null;
+    $retval = null;
 
     $cmd = 'ffprobe -show_entries stream=index,codec_type:stream_tags=language -of compact '.$path.' -v 0 \
             | grep codec_type=subtitle \
@@ -61,10 +47,12 @@ class FFMPEG {
       http_response_code(400);
       die($retval."\n\n".print_r($output));
     }
+
   }
 
   /// Get both the audio and subtitle language tracks
   static function getAllLangs($path) {
+
     $output=null;
     $retval=null;
 
@@ -92,12 +80,14 @@ class FFMPEG {
       http_response_code(400);
       die($retval."\n\n".print_r($output));
     }
+
   }
 
   /// Get both the audio and subtitle language tracks
   static function getAllLangsWithIndex($path) {
-    $output=null;
-    $retval=null;
+
+    $output = null;
+    $retval = null;
 
     $cmd = 'ffprobe -show_entries stream=index,codec_type:stream_tags=language -of compact '.$path.' -v 0 \
             | grep -E "(.*codec_type=audio.*)|(.*codec_type=subtitle.*)"';
@@ -123,10 +113,12 @@ class FFMPEG {
       http_response_code(400);
       die($retval."\n\n".print_r($output));
     }
+
   }
 
   /// Gets the audio index from the lang name
   static function audioIndexFromLang($path, $lang) {
+
     $output=null;
     $retval=null;
 
@@ -150,10 +142,12 @@ class FFMPEG {
       http_response_code(400);
       die($retval."\n\n".print_r($output));
     }
+
   }
 
   /// Gets the caption index from the lang name
   static function captionIndexFromLang($path, $lang) {
+
     $output=null;
     $retval=null;
 
@@ -177,12 +171,14 @@ class FFMPEG {
       http_response_code(400);
       die($retval."\n\n".print_r($output));
     }
+
   }
 
 
   /// Streaming functions
   /// DASH
   static function DASH($path) {
+
     $cmd = 'ffmpeg -y -re -i '.$path.' \
             -c:v libx264 -x264opts "keyint=24:min-keyint=24:no-scenecut" -r 24 \
             -c:a aac -b:a 128k \
@@ -199,15 +195,36 @@ class FFMPEG {
     system($cmd2);
 
     echo file_get_contents("/var/www/html/dash/manifest.mpd");
+
+  }
+
+  static function extractTrack($source, $index, $output) {
+
+    $cmd = 'ffmpeg -i '.$source.' -map 0:'.$index.' -ac 2 -ab 192k -vn -sn '.$output;
+
+    exec($cmd, $output, $retval);
+
+    /// A return value of 0
+    //  indicates a success
+    if ($retval == 0) {
+      return true;
+    } else {
+      http_response_code(400);
+      die($retval."\n\n".print_r($output));
+    }
+
   }
 
   static function extractVobsub($path) {
+
+
 
   }
 
   /// Use MEncoder to extract vobsub from MPEG files,
   //  then use VobSub2SRT to convert them to webvtt files. 
   static function vobsub2srt($path) {
+
     $cmd = 'vobsub2srt';
     $cmd2 = 'mencoder';
 
@@ -221,6 +238,7 @@ class FFMPEG {
       http_response_code(400);
       die($retval."\n\n".print_r($output));
     }
+
   }
 
 }

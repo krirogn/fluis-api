@@ -99,7 +99,7 @@ class S3 {
         }
 
         /// Get the programs
-        $response = $this->client->listObjects(array('Bucket' => GV::S3_BUCKET));
+        $response = $this->client->listObjects(array('Bucket' => $this->bucket));
         $files = $response->getPath('Contents');
 
         $content = array();
@@ -115,7 +115,7 @@ class S3 {
 
     }
 
-    public function getEpisodesFromID($login, $id, $season) {
+    public function getEpisodesFromID($id, $season) {
 
         if (!isset($id) || !isset($season)) {
             http_response_code(400);
@@ -123,10 +123,10 @@ class S3 {
         }
 
         /// Get the title from ID
-        $title = fileDB::titleFromID($login, $id);
+        $title = fileDB::titleFromID($id);
 
         /// Get the programs
-        $response = $this->client->listObjects(array('Bucket' => GV::S3_BUCKET));
+        $response = $this->client->listObjects(array('Bucket' => $this->bucket));
         $files = $response->getPath('Contents');
 
         $content = array();
@@ -140,6 +140,27 @@ class S3 {
 
         return $content;
 
+    }
+
+    public function getSeasonsFromID($id) {
+        if (!isset($id)) {
+            http_response_code(400);
+            die("ID not selected");
+        }
+        
+        /// Get the title from ID
+        $title = fileDB::titleFromID($id);
+        /// Get the programs
+        $response = $this->client->listObjects(array('Bucket' => $this->bucket));
+        $files = $response->getPath('Contents');
+        $content = array();
+        foreach ($files as $file) {
+            $d = explode('/', $file['Key']);
+            if ($d[0] == "Shows" && sizeof($d) >= 3 && $d[1] == $title && !in_array($d[2], $content)) {
+                array_push($content, $d[2]);
+            }
+        }
+        return $content;
     }
 
 
@@ -175,7 +196,7 @@ class S3 {
         /// Sets the max time to 10m
         set_time_limit(600);
 
-        $loc = (String)$USER['id'] . '/Shows/' . $title . '/' . $season . '/' . $number . '-en' . $type;
+        $loc = (String)$GLOBALS['USER']['id'] . '/Shows/' . $title . '/' . $season . '/' . $number . '-en' . $type;
 
         $result = $this->client->putObject([
 			'Bucket' => $this->bucket,
@@ -190,7 +211,7 @@ class S3 {
             /// If the ID is new, then you
             //  have to create a new entry.
             if ($id != "") {
-                $userId = $USER['id'];
+                $userId = $GLOBALS['USER']['id'];
                 
                 ///
                 $lib = fileDB::get('library/'.$userId.'.json', false, false);
@@ -207,7 +228,7 @@ class S3 {
                 fileDB::set('library/', $userId.'.json', json_encode($lib));
             /// Insert an episode into an entry
             } else {
-                $userId = $USER['id'];
+                $userId = $GLOBALS['USER']['id'];
                 
                 ///
                 $showID = "";
@@ -235,23 +256,37 @@ class S3 {
     /// 
     public function uploadMovie($title, $type, $fileLocation, $id) {
 
-        /// Sets the max time to 10m
-        set_time_limit(600);
+        /// Sets the max time to 20m
+        set_time_limit(1200);
 
-        $loc = (String)$USER['id'] . '/Movies/' . $title . '/main-en' . $type;
+        $loc = (String)$GLOBALS['USER']['id'] . '/Movies/' . $title . '/main-en' . $type;
 
 
-        /*
+        
         /// Transcode the video
         /// Get the metadata
+        $meta = FFMPEG::getAllLangsWithIndex($fileLocation);
+        //die(json_encode($meta, JSON_UNESCAPED_SLASHES));
+        $audioTracks   = $meta['audio'];
+        $captionTracks = $meta['caption'];
 
+        // The list of finished files
+        $audioFiles;
+        $captionFiles;
+        $videoFile;
 
         /// Extract the audio
+        foreach ($audioTracks as $a) {
+            $aLoc = "tmp/audio-".$a[0].".mp4";
+            FFMPEG::extractTrack($fileLocation, $a[1], $aLoc);
+            array_push($audioFiles, $aLoc);
+        }
+        die(json_encode($audioFiles, JSON_UNESCAPED_SLASHES));
 
 
         /// Checks if the subtitles are
         //  in bitmap format.
-        if () {
+        if (false) {
             /// Use MEncoder to extract VobSub file(s)
 
             /// Use VobSub2SRT to convert the VobSub file(s) to (Web)VTT
@@ -265,14 +300,13 @@ class S3 {
 
         /// Strip down to only video
 
-        */
 
-
+        die();
         $result = $this->client->putObject([
 			'Bucket' => $this->bucket,
 			'Key'    => $loc,
-            'SourceFile' => $fileLocation,
-            'ACL'    => 'public-read'
+			'SourceFile' => $fileLocation,
+			'ACL'    => 'public-read'
 		]);
 
         /// Checks if the upload was successfull
@@ -280,7 +314,7 @@ class S3 {
             /// Inserts the metadata
             /// If the ID is new, then you
             //  have to create a new entry.
-            $userId = $USER['id'];
+            $userId = $GLOBALS['USER']['id'];
             
             ///
             $lib = fileDB::get('library/'.$userId.'.json', false, false);
@@ -330,7 +364,7 @@ class S3 {
         $IDs = array();
 
         /// 
-        $userId = $USER['id'];
+        $userId = $GLOBALS['USER']['id'];
         
         $lib = fileDB::get('library/'.$userId.'.json', false, false);
         foreach($lib->$query as $id => $c) {

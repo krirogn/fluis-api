@@ -2,8 +2,8 @@
 	"id": 1,
 	"pass": "$2y$10$92hFK3H3OcTyH6TiU.jopOmn6GB8oo1KOlJOmAQluxHgKsjLywNCS",
 	"email": "krirogn@gmail.com",
-	"s3_base": "https://s3.fr-par.scw.cloud",
-	"s3_bucket": "fluis-media",
+	"s3_base": "https://fluis-media.s3.fr-par.scw.cloud",
+	"s3_bucket": "fluis",
 	"s3_region": "fr-par",
 	"s3_access_key": "SCWM7EADT5WGA1AV89X3",
 	"s3_secret_key": "215e67c1-83bf-429c-b9c8-8908417368a3"

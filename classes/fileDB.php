@@ -238,7 +238,7 @@ class fileDB {
         $urlType = ($type == "shows") ? "Shows" : "Movies";
 
         /// Get the URL
-        $userId = $USER['id'];
+        $userId = $GLOBALS['USER']['id'];
 
         ///
         $lib = fileDB::get('library/'.$userId.'.json', false, false);
@@ -266,7 +266,7 @@ class fileDB {
     static function titleFromID($id) {
 
         /// Get the user ID
-        $userId = $USER['id'];
+        $userId = $GLOBALS['USER']['id'];
 
         ///
         $lib = fileDB::get('library/'.$userId.'.json', false, false);
