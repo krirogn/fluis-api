@@ -260,10 +260,19 @@ class S3 {
         ob_start();
         ob_implicit_flush(true);
 
+        // Send output
+        date_default_timezone_set("Europe/Oslo");
+        echo("Start: ".date("H:i:s", time()));
+        ob_flush();
+
         $loc = (String)$GLOBALS['USER']['id'] . '/Movies/' . $title . '/main-en' . $type;
 
         // Send output
         echo("\n".'S3 LOC: '.$loc."\n\n");
+        ob_flush();
+
+        // Send output
+        echo("Initializing and clearing!\n\n");
         ob_flush();
 
         /// Init folder structure
@@ -293,7 +302,7 @@ class S3 {
         $videoFile = "";
 
         // Send output
-        /*echo("\n"."---------------\n".'Starting audio track extraction'."\n");
+        echo("\n"."---------------\n".'Starting audio track extraction'."\n");
         ob_flush();
 
         /// Extract the audio
@@ -311,7 +320,7 @@ class S3 {
             ob_flush();
 
             array_push($audioFiles, $aLoc);
-        }*/
+        }
         //die(json_encode($audioFiles, JSON_UNESCAPED_SLASHES));
 
 
@@ -337,9 +346,9 @@ class S3 {
                 echo($cLoc."\n");
                 ob_flush();
 
-                $correctedIndex = $ind - (int)$captionTracks[min(array_keys($captionTracks))];
+                //$correctedIndex = $ind - (int)$captionTracks[min(array_keys($captionTracks))];
                 //die(min(array_keys($captionTracks))."  :  ".$correctedIndex);
-                FFMPEG::extractVobsub($fileLocation, $lang, $correctedIndex, $cLoc);
+                FFMPEG::extractVobsub($fileLocation, $lang, $ind, $cLoc);
                 // Send output
                 echo("VobSub extracted\n");
                 ob_flush();
@@ -371,14 +380,26 @@ class S3 {
 
 
         // Send output
-        echo("Deleting tmp files\n");
+        echo("\nDeleting tmp files\n");
         ob_flush();
 
         /// Get all files to be deleted
         $tmpSubFiles = glob("/tmp/fluis/*.sub");
+        foreach ($tmpSubFiles as $t) {
+            fileDB::del($t, true);
+        }
         $tmpIdxFiles = glob("/tmp/fluis/*.idx");
+        foreach ($tmpIdxFiles as $t) {
+            fileDB::del($t, true);
+        }
         $tmpSrtFiles = glob("/tmp/fluis/*.srt");
-        die(json_encode($tmpSubFiles, JSON_UNESCAPED_SLASHES));
+        foreach ($tmpSrtFiles as $t) {
+            fileDB::del($t, true);
+        }
+        $tmpMkvFiles = glob("/tmp/fluis/*.mkv");
+        foreach ($tmpMkvFiles as $t) {
+            fileDB::del($t, true);
+        }
 
         // Delete them
         //foreach ()
@@ -390,7 +411,7 @@ class S3 {
 
         // Send output
         echo('Audio Files:   '.json_encode($audioFiles, JSON_UNESCAPED_SLASHES)."\n");
-        echo('Caption Files: '.json_encode($captionFiles, JSON_UNESCAPED_SLASHES)."\n\n");
+        echo('Caption Files: '.json_encode($captionFiles, JSON_UNESCAPED_SLASHES)."\n");
         ob_flush();
 
         /// Strip down to only video
@@ -399,7 +420,11 @@ class S3 {
 
         FFMPEG::stripVideo($fileLocation, "/tmp/fluis/".(String)$GLOBALS['USER']['id']."_{$id}-main.mp4");
 
-        die("IDK BRO\n");
+        // Send output
+        echo("Video file stripped!\n");
+        ob_flush();
+
+        die("Start: ".date("H:i:s", time())."\n");
 
 
         die();

@@ -138,7 +138,7 @@ class Auth {
     } else {
 
       http_response_code(400);
-      die("Not logged in2");
+      die("Not logged in");
 
     }
 

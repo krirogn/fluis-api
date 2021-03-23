@@ -224,16 +224,16 @@ class FFMPEG {
   }
 
 
-  static function stripVideo($source, $output) {
+  static function stripVideo($source, $out) {
 
-    $cmd = 'ffmpeg -i '.$source.' -map 0:v -c copy '.$output;
+    $cmd = 'ffmpeg -i '.$source.' -map 0:v -c copy '.$out;
 
     exec($cmd, $output, $retval);
 
     /// A return value of 0
     //  indicates a success
     if ($retval == 0) {
-      if (fileDB::fileExists($output, true)) {
+      if (fileDB::fileExists($out, true)) {
         return true;
       } else {
         die("FILE IS NOT EXIST");
@@ -278,29 +278,39 @@ class FFMPEG {
       die("\n------\nERROR: ".$ret."\nOUTPUT: ".print_r($out)."\n");
     }
 
-    $iso = new Matriphe\ISO639\ISO639;
-    $langCode = $iso->code1ByLanguage($iso->languageByCode2t($lang));
-    $cmd = 'mencoder '.$source.' -ifo '.$o.'.ifo -vobsubout '.$o.' -vobsuboutindex '.$index.' \
-            -vobsuboutid '.$langCode.' -sid '.$index.' -nosound -ovc copy -o /dev/null 2>&1';
-
-    exec($cmd, $output, $retval);
+    $cmdMp4ToMKV = 'ffmpeg -y -i '.$source.' -map 0:'.$index.' -c dvd_subtitle vobsub-'.$lang.'.mkv 2>&1';
+    exec($cmdMp4ToMKV, $outputMp4ToMKV, $retvalMp4ToMKV);
 
     /// A return value of 0
     //  indicates a success
-    if ($retval == 0) {
-      if (fileDB::fileExists($o.".sub", true)) {
-        if (fileDB::fileExists($o.".idx", true)) {
-          return true;
+    if ($retvalMp4ToMKV == 0) {
+
+      $cmd = 'mkvextract tracks vobsub-'.$lang.'.mkv 0:"'.$o.'" 2>&1';
+      exec($cmd, $output, $retval);
+
+      /// A return value of 0
+      //  indicates a success
+      if ($retval == 0) {
+
+        if (fileDB::fileExists($o.".sub", true)) {
+          if (fileDB::fileExists($o.".idx", true)) {
+            return true;
+          } else {
+            die(".idx FILE IS NOT EXIST");
+          }
         } else {
-          die(".idx FILE IS NOT EXIST");
+          die(".sub FILE IS NOT EXIST");
         }
+
       } else {
-        die(".sub FILE IS NOT EXIST");
+        http_response_code(400);
+        die("\n------\nERROR: ".$retval."\nOUTPUT: ".print_r($output)."\n");
       }
+
     } else {
       http_response_code(400);
-      die("\n------\nERROR: ".$retval."\nOUTPUT: ".print_r($output)."\n");
-    }
+      die("\n------\nERROR: ".$retvalMp4ToMKV."\nOUTPUT: ".print_r($outputMp4ToMKV)."\n");
+    }    
 
   }
 
@@ -313,10 +323,6 @@ class FFMPEG {
     $langCode = $iso->code1ByLanguage($iso->languageByCode2t($lang));
     
     $cmd = 'vobsub2srt '.$source.' --lang '.$langCode.' 2>&1';
-
-    echo($cmd."\n");
-    ob_flush();
-
     exec($cmd, $output, $retval);
 
     /// A return value of 0
