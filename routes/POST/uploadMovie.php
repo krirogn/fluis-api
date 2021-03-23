@@ -23,4 +23,4 @@ if ($ext == 'mp4' || $ext == 'm4v') {
 }
 
 http_response_code(200);
-exit($GLOBALS['s3']->uploadMovie($path, $type, $_FILES['video']['tmp_name'], $login, $id));
+exit($GLOBALS['s3']->uploadMovie($path, $type, $_FILES['video']['tmp_name'], $id));

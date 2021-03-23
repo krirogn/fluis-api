@@ -256,12 +256,24 @@ class S3 {
     /// 
     public function uploadMovie($title, $type, $fileLocation, $id) {
 
-        /// Sets the max time to 20m
-        set_time_limit(1200);
+        /// Start output buffering
+        ob_start();
+        ob_implicit_flush(true);
 
         $loc = (String)$GLOBALS['USER']['id'] . '/Movies/' . $title . '/main-en' . $type;
 
+        // Send output
+        echo("\n".'S3 LOC: '.$loc."\n\n");
+        ob_flush();
 
+        /// Init folder structure
+        if (!fileDB::folderExists("/tmp/fluis", true)) {
+            // Make the folder
+            fileDB::setFolder("/tmp/fluis", true);
+        } else {
+            // Delete all contents in folder
+            fileDB::delAllInFolder("/tmp/fluis", true);
+        }
         
         /// Transcode the video
         /// Get the metadata
@@ -270,35 +282,124 @@ class S3 {
         $audioTracks   = $meta['audio'];
         $captionTracks = $meta['caption'];
 
+        // Send output
+        echo('Audio Tracks:   '.json_encode($audioTracks, JSON_UNESCAPED_SLASHES)."\n");
+        echo('Caption Tracks: '.json_encode($captionTracks, JSON_UNESCAPED_SLASHES)."\n");
+        ob_flush();
+
         // The list of finished files
-        $audioFiles;
-        $captionFiles;
-        $videoFile;
+        $audioFiles = array();
+        $captionFiles = array();
+        $videoFile = "";
+
+        // Send output
+        /*echo("\n"."---------------\n".'Starting audio track extraction'."\n");
+        ob_flush();
 
         /// Extract the audio
-        foreach ($audioTracks as $a) {
-            $aLoc = "tmp/audio-".$a[0].".mp4";
-            FFMPEG::extractTrack($fileLocation, $a[1], $aLoc);
+        foreach ($audioTracks as $lang => $ind) {
+            $aLoc = "/tmp/fluis/".(String)$GLOBALS['USER']['id']."_{$id}-audio-{$lang}.mp4";
+
+            // Send output
+            echo($aLoc."\n");
+            ob_flush();
+
+            //die($fileLocation." ".$ind." ".$aLoc."\n");
+            FFMPEG::extractAudioTrack($fileLocation, $ind, $aLoc);
+            // Send output
+            echo("Audio track extracted\n\n");
+            ob_flush();
+
             array_push($audioFiles, $aLoc);
+        }*/
+        //die(json_encode($audioFiles, JSON_UNESCAPED_SLASHES));
+
+
+        // Send output
+        echo("\n"."---------------\n".'Starting caption track extraction'."\n\n");
+        ob_flush();
+
+        foreach ($captionTracks as $lang => $ind) {
+
+            echo("Checking caption type for ({$lang} : {$ind})\n");
+            ob_flush();
+
+            /// Checks if the subtitles are
+            //  in bitmap format.
+            if (FFMPEG::checkSubFormat($fileLocation, $ind) == "VobSub") {
+                echo("Caption \"{$lang}\" is a VobSub\n");
+                ob_flush();
+
+
+                /// Use MEncoder to extract VobSub file(s)
+                $cLoc = "/tmp/fluis/".(String)$GLOBALS['USER']['id']."_{$id}-caption-{$lang}";
+
+                echo($cLoc."\n");
+                ob_flush();
+
+                $correctedIndex = $ind - (int)$captionTracks[min(array_keys($captionTracks))];
+                //die(min(array_keys($captionTracks))."  :  ".$correctedIndex);
+                FFMPEG::extractVobsub($fileLocation, $lang, $correctedIndex, $cLoc);
+                // Send output
+                echo("VobSub extracted\n");
+                ob_flush();
+
+
+                /// Use VobSub2SRT to convert the VobSub file(s) to (Web)VTT
+                FFMPEG::vobsub2srt($cLoc, $lang);
+
+                // Send output
+                echo("VobSub converted to SRT\n");
+                ob_flush();
+
+
+                /// Use FFMPEG to convert SRT to (Web)VTT
+                FFMPEG::srt2vtt($cLoc.".srt", $cLoc.".vtt");
+
+                // Send output
+                echo("VobSub converted to VTT\n\n");
+                ob_flush();
+
+                array_push($captionFiles, $cLoc.".vtt");
+
+            // If the subtitles are text based
+            } else {
+                /// Use FFMPEG to extract them as (Web)VTT
+
+            }
         }
-        die(json_encode($audioFiles, JSON_UNESCAPED_SLASHES));
 
 
-        /// Checks if the subtitles are
-        //  in bitmap format.
-        if (false) {
-            /// Use MEncoder to extract VobSub file(s)
+        // Send output
+        echo("Deleting tmp files\n");
+        ob_flush();
 
-            /// Use VobSub2SRT to convert the VobSub file(s) to (Web)VTT
+        /// Get all files to be deleted
+        $tmpSubFiles = glob("/tmp/fluis/*.sub");
+        $tmpIdxFiles = glob("/tmp/fluis/*.idx");
+        $tmpSrtFiles = glob("/tmp/fluis/*.srt");
+        die(json_encode($tmpSubFiles, JSON_UNESCAPED_SLASHES));
+
+        // Delete them
+        //foreach ()
+
+        // Send output
+        echo("Tmp files deleted!\n\n");
+        ob_flush();
 
 
-        // If the subtitles are text based
-        } else {
-            /// Use FFMPEG to extract them as (Web)VTT
-
-        }
+        // Send output
+        echo('Audio Files:   '.json_encode($audioFiles, JSON_UNESCAPED_SLASHES)."\n");
+        echo('Caption Files: '.json_encode($captionFiles, JSON_UNESCAPED_SLASHES)."\n\n");
+        ob_flush();
 
         /// Strip down to only video
+        echo("\n"."---------------\n".'Starting stripping down the video'."\n\n");
+        ob_flush();
+
+        FFMPEG::stripVideo($fileLocation, "/tmp/fluis/".(String)$GLOBALS['USER']['id']."_{$id}-main.mp4");
+
+        die("IDK BRO\n");
 
 
         die();
@@ -333,7 +434,9 @@ class S3 {
 
     }
 
-
+    public function test() {
+        return "SUCCESS FOR CLASS";
+    }
 
     /// Private functions
 

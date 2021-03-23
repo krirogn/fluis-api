@@ -62,6 +62,21 @@ class fileDB {
 
     }
 
+    static function delAllInFolder($path, $root = false) {
+
+        if ($root == false) {
+            $path = "data/".$path;
+        }
+
+        $files = glob($path."/*"); // get all file names
+        foreach($files as $file){ // iterate files
+            if(is_file($file)) {
+                unlink($file); // delete file
+            }
+        }
+
+    }
+
     /// A general file to see if file exists
     static function fileExists($path, $root = false) {
     
