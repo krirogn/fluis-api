@@ -311,6 +311,7 @@ class FFMPEG {
 
     $iso = new Matriphe\ISO639\ISO639;
     $langCode = $iso->code1ByLanguage($iso->languageByCode2t($lang));
+    
     $cmd = 'vobsub2srt '.$source.' --lang '.$langCode.' 2>&1';
 
     echo($cmd."\n");

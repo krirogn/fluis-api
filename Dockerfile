@@ -4,10 +4,8 @@ RUN docker-php-ext-install pdo pdo_mysql zip
 RUN a2enmod rewrite
 RUN service apache2 restart
 
-# RUN touch "$PHP_INI_DIR/php.ini"
-
-# Install FFMPEG, MEncoder and MediaInfo
-RUN apt-get update && apt-get install -y ffmpeg mencoder mediainfo
+# Install Zip, Nano, FFMPEG, MKVToolNix, MediaInfo and Tesseract OCR
+RUN apt-get update && apt-get install -y zip nano ffmpeg mkvtoolnix mediainfo tesseract-ocr
 
 # Install VobSub2SRT
 RUN cd /tmp \
